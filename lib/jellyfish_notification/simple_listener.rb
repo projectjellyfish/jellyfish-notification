@@ -1,7 +1,7 @@
 module JellyfishNotification
   class SimpleListener
-    def project_creation_successful(project)
-      JellyfishMailer.project_creation_successful(project).deliver_now
+    def publish_project_creation(project)
+      JellyfishMailer.publish_project_creation(project).deliver_now
     end
   end
 end

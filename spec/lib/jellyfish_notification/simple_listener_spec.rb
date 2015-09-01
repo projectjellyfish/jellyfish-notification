@@ -21,7 +21,7 @@ class Project
   end
 
   def save
-    broadcast('project_creation_successful', Project.instance_params)
+    broadcast('publish_project_creation', Project.instance_params)
   end
 end
 
@@ -31,12 +31,12 @@ describe JellyfishNotification::SimpleListener do
   end
 
   context 'project created' do
-    it 'should trigger admin notification' do
+    it 'should broadcast creation and send admin notification' do
       # CREATE DUMMY LISTENER - FOLLOWING WISPER RSPEC EXAMPLE AT https://github.com/krisleech/wisper/blob/master/spec/lib/integration_spec.rb
       listener = double('listener')
 
       # SET EXPECTATION THAT LISTENER WILL RECEIVE PROJECT CREATION SUCCESSFUL BROADCAST
-      expect(listener).to receive(:project_creation_successful)
+      expect(listener).to receive(:publish_project_creation)
 
       # GENERATE NEW PROJECT
       project = Project.new
