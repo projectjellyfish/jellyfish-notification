@@ -17,4 +17,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'rails'
   s.add_dependency 'dotenv-rails' # to use env vars from jellyfish api
   s.add_dependency 'pg' # to use jellyfish db
+  s.add_dependency 'wisper' # enables pub/sub functions
 end
