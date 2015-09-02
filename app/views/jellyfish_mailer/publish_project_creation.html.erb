@@ -5,7 +5,9 @@
 </head>
 <body>
 <p>Dear Admin,</p>
-<p>Project '<%= @project.name %>' has been created and is awaiting approval.</p>
+<p>The following project has been created:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Name: <%= @project['name'].to_s.upcase %></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Budget: <%= number_to_currency(@project['budget']) %></p>
 <p>Please navigate to the project and approve it at your discretion.</p>
 <p>Thank you,</p>
 <p>Project Jellyfish Mailer</p>

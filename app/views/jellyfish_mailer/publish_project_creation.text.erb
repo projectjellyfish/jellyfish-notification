@@ -1,5 +1,7 @@
 Dear Admin,
-Project '<%= @project.name %>' has been created an is awaiting approval.
+The following project has been created:
+Name: <%= @project['name'].to_s.upcase %>
+Budget: <%= number_to_currency(@project['budget']) %>
 Please navigate to the project and approve it at your discretion.
 Thank you,
 Project Jellyfish Mailer
