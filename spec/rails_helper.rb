@@ -2,6 +2,7 @@ ENV['RAILS_ENV'] ||= 'test'
 require 'spec_helper'
 require File.expand_path('../dummy/config/environment', __FILE__)
 require 'rspec/rails'
+require 'delayed_job_active_record'
 
 # Loads Spec Support Files
 Dir[Rails.root.join('../support/*.rb')].each { |f| require f }

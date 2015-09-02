@@ -18,4 +18,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'dotenv-rails' # to use env vars from jellyfish api
   s.add_dependency 'pg' # to use jellyfish db
   s.add_dependency 'wisper' # enables pub/sub functions
+  s.add_dependency 'delayed_job_active_record' # for sending mail asynchronously
 end
