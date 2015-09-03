@@ -2,11 +2,11 @@ module JellyfishNotification
   class SimpleListener
     # IF ENV['JELLYFISH_ASYNCHRONOUS_DELIVERY'] == 'true' THEN QUEUE WITH DELAYED JOBS
     # ELSE DELIVER NOW
-    def publish_project_create(response, recipients, project_url)
+    def publish_project_create(response, recipients, projects_url)
       if ENV['JELLYFISH_ASYNCHRONOUS_DELIVERY'] == 'true'
-        JellyfishMailer.delay.publish_project_create(response, recipients, project_url)
+        JellyfishMailer.delay.publish_project_create(response, recipients, projects_url)
       else
-        JellyfishMailer.publish_project_create(response, recipients, project_url).deliver_now
+        JellyfishMailer.publish_project_create(response, recipients, projects_url).deliver_now
       end
     end
 
