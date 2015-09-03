@@ -23,7 +23,7 @@ class Project
   end
 
   def save
-    publish('publish_project_creation', Project.mock, '')
+    publish('publish_project_create', Project.mock, '', 'http://fizzbuzz.com')
   end
 end
 
@@ -38,7 +38,7 @@ describe JellyfishNotification::SimpleListener do
       listener = double('listener')
 
       # SET EXPECTATION THAT LISTENER WILL RECEIVE PROJECT CREATION SUCCESSFUL BROADCAST
-      expect(listener).to receive(:publish_project_creation)
+      expect(listener).to receive(:publish_project_create)
 
       # GENERATE NEW PROJECT
       project = Project.new
