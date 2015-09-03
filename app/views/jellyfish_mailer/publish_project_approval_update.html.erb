@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+</head>
+<body>
+<p>Dear Admin,</p>
+<p>The following project has been approved:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Name: <%= @project.name.to_s.upcase %></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Budget: <%= number_to_currency(@project.budget) %></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;URL: <a href="<%= @project_url %>"><%= @project_url %></a></p>
+<p>Thank you,</p>
+<p>Project Jellyfish Mailer</p>
+</body>
+</html>
