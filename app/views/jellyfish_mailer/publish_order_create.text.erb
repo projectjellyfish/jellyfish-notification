@@ -1,0 +1,9 @@
+Dear Admin,
+An order has been placed with the following items:
+<% @order.order_items.each do |o| %>
+Product Type: <%= o.product.product_type.name %>, Product: <%= o.product.name %>, Project: <%= o.project.name %>
+<% end %>
+Order details can be found at <%= @order_url %>.
+No further action is required at this point.
+Thank you,
+Project Jellyfish Mailer

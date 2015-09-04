@@ -44,17 +44,144 @@ class Project
   end
 
   def publish_project_create
-    publish('publish_project_create', Project.mock_project_create_response, '', 'http://fizzbuzz.com')
+    publish('publish_project_create', Project.mock_project_create_response, '', 'http://www.foobar.com/projects')
   end
 
   def publish_project_approval_update
-    publish('publish_project_approval_update', Project.mock_approval_update_project, '', 'http://test.foobar.com')
+    publish('publish_project_approval_update', Project.mock_approval_update_project, '', 'http://www.foobar.com/projects/1')
+  end
+end
+
+class Order
+  include Wisper::Publisher
+
+  def self.mock_order_create
+    # MOCK ORDER AS IT EXISTS IN JF CONTROLLER
+    OpenStruct.new(
+      id: 10,
+      staff_id: 1,
+      engine_response: nil,
+      active: nil,
+      created_at: '2015-09-03T19:52:32.391Z',
+      updated_at: '2015-09-03T19:52:32.391Z',
+      options: nil,
+      deleted_at: nil,
+      total: 0.0,
+      order_items: [
+        OpenStruct.new(
+          id: 22,
+          order_id: 10,
+          cloud_id: nil,
+          product_id: 1,
+          service_id: nil,
+          provision_status: nil,
+          created_at: '2015-09-03T19:52:32.393Z',
+          updated_at: '2015-09-03T19:52:32.393Z',
+          deleted_at: nil,
+          project_id: 1,
+          miq_id: nil,
+          uuid: nil,
+          setup_price: 0.0,
+          hourly_price: 0.026,
+          monthly_price: 0.0,
+          payload_request: nil,
+          payload_acknowledgement: nil,
+          payload_response: nil,
+          status_msg: nil,
+          project: Project.mock_approval_update_project,
+          product:
+            OpenStruct.new(
+              id: 1,
+              name: 'AWS Small EC2',
+              description: 't2.small EC2',
+              active: true,
+              img: 'products/aws_ec2.png',
+              created_at: '2015-09-03T19:51:14.145Z',
+              updated_at: '2015-09-03T19:51:14.145Z',
+              deleted_at: nil,
+              setup_price: 0.0,
+              hourly_price: 0.026,
+              monthly_price: 0.0,
+              product_type: OpenStruct.new(name: 'AWS Fog Infrastructure'))
+        ),
+        OpenStruct.new(
+          id: 23,
+          order_id: 10,
+          cloud_id: nil,
+          product_id: 8,
+          service_id: nil,
+          provision_status: nil,
+          created_at: '2015-09-03T19:52:32.400Z',
+          updated_at: '2015-09-03T19:52:32.400Z',
+          deleted_at: nil,
+          project_id: 1,
+          miq_id: nil,
+          uuid: nil,
+          setup_price: 0.0,
+          hourly_price: 0.034,
+          monthly_price: 0.0,
+          payload_request: nil,
+          payload_acknowledgement: nil,
+          payload_response: nil,
+          status_msg: nil,
+          project: Project.mock_approval_update_project,
+          product:
+            OpenStruct.new(
+              id: 8,
+              name: 'Small MySQL',
+              description: 't2.small MySQL',
+              active: true,
+              img: 'products/aws_rds.png',
+              created_at: '2015-09-03T19:51:14.145Z',
+              updated_at: '2015-09-03T19:51:14.145Z',
+              deleted_at: nil,
+              setup_price: 0.0,
+              hourly_price: 0.034,
+              monthly_price: 0.0,
+              product_type: OpenStruct.new(name: 'AWS Fog Infrastructure')))])
+  end
+
+  def publish_order_create
+    publish('publish_order_create', Order.mock_order_create, '', 'http://www.foobar.com/order-history')
   end
 end
 
 describe JellyfishNotification::SimpleListener do
   after(:each) do
     ActionMailer::Base.deliveries.clear
+  end
+
+  context 'order create' do
+    it 'should publish order create and send notification' do
+      # CREATE DUMMY LISTENER - FOLLOWING WISPER RSPEC EXAMPLE AT https://github.com/krisleech/wisper/blob/master/spec/lib/integration_spec.rb
+      listener = double('listener')
+
+      # SET EXPECTATION THAT LISTENER WILL RECEIVE PROJECT APPROVAL UPDATE BROADCAST
+      expect(listener).to receive(:publish_order_create)
+
+      # GENERATE NEW PROJECT
+      order = Order.new
+
+      # SUBSCRIBE JELLYFISH MAILER LISTENER TO PROJECT
+      order.subscribe(listener)
+
+      # VERIFY THAT NO OTHER EMAILS ARE QUEUED
+      expect(ActionMailer::Base.deliveries.count).to eq(0)
+
+      # TRIGGER ORDER CREATE NOTIFICATION
+      order.publish_order_create
+
+      if ENV['JELLYFISH_ASYNCHRONOUS_DELIVERY'] == 'true'
+        # VERIFY THAT A MAIL WAS SENT UPON PROJECT SAVE AFTER INITIAL CREATE
+        expect(ActionMailer::Base.deliveries.count).to eq(0)
+      else
+        # VERIFY THAT A MAIL WAS SENT UPON PROJECT SAVE AFTER INITIAL CREATE
+        expect(ActionMailer::Base.deliveries.count).to eq(1)
+
+        # VERIFY THAT THE SENDER IS THE RECIPIENT SPECIFIED IN DOTENV FILE
+        expect(ActionMailer::Base.deliveries.last.from.first).to eq(JellyfishNotification::JellyfishMailer.default_params[:from])
+      end
+    end
   end
 
   context 'project approval updated' do

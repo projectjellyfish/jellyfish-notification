@@ -19,5 +19,12 @@ module JellyfishNotification
       recipients = ENV['JELLYFISH_SMTP_DEFAULT_RECIPIENT'] if recipients.empty?
       mail(template_path: 'jellyfish_mailer', to: recipients, subject: "Project Approval Notification: #{@project.name.to_s.upcase}")
     end
+
+    def publish_order_create(order, recipients, orders_url)
+      @order = order
+      @order_url = orders_url+"/#{@order.id}"
+      recipients = ENV['JELLYFISH_SMTP_DEFAULT_RECIPIENT'] if recipients.empty?
+      mail(template_path: 'jellyfish_mailer', to: recipients, subject: 'Order Create Notification')
+    end
   end
 end

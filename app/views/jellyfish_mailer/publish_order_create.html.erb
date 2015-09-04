@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+</head>
+<body>
+<p>Dear Admin,</p>
+<p>An order has been placed with the following items:</p>
+<table>
+  <thead>
+    <tr>
+      <td><b>Product Type</b></td>
+      <td><b>Product</b></td>
+      <td><b>Project</b></td>
+    </tr>
+  </thead>
+  <tbody>
+  <% @order.order_items.each do |o| %>
+    <tr>
+      <td><%= o.product.product_type.name %></td>
+      <td><%= o.product.name %></td>
+      <td><%= o.project.name %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+<p>Order details can be found at <a href="<%= @order_url %>"><%= @order_url %></a>.</p>
+<p>No further action is required at this point.</p>
+<p>Thank you,</p>
+<p>Project Jellyfish Mailer</p>
+</body>
+</html>
