@@ -1,5 +1,7 @@
 Jellyfish Notification
 =======
+[![Gem Version](https://badge.fury.io/rb/jellyfish-notification.svg)](http://badge.fury.io/rb/jellyfish-notification)
+
 A notification system for [Project Jellyfish] (https://github.com/projectjellyfish/api). Can be used to send email notifications to users on project create and approval or order create.
 
 #### Installation
