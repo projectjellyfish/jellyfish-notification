@@ -4,7 +4,15 @@ module JellyfishNotification
   class JellyfishMailer < ActionMailer::Base
     default from: ENV['JELLYFISH_SMTP_DEFAULT_SENDER']
 
-    def publish_project_create(response, recipients, projects_url)
+    def publish_project_create_approvers(response, recipients, projects_url)
+      # format block causes weirdness, so depending on rails conventions so templates resolve
+      @project = JSON.parse(response.body).to_h
+      @project_url = projects_url+"/#{@project['id'].to_s}"
+      recipients = ENV['JELLYFISH_SMTP_DEFAULT_RECIPIENT'] if recipients.empty?
+      mail(template_path: 'jellyfish_mailer', to: recipients, subject: "Project Create Notification: #{@project['name'].to_s.upcase}")
+    end
+
+    def publish_project_create_confirmation(response, recipients, projects_url)
       # format block causes weirdness, so depending on rails conventions so templates resolve
       @project = JSON.parse(response.body).to_h
       @project_url = projects_url+"/#{@project['id'].to_s}"

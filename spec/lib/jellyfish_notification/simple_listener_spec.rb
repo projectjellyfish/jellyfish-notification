@@ -44,7 +44,8 @@ class Project
   end
 
   def publish_project_create
-    publish('publish_project_create', Project.mock_project_create_response, '', 'http://www.foobar.com/projects')
+    recipients = { project_approvers: 'admin@foobar.com', project_creator: 'user@foobar.com' }
+    publish('publish_project_create', Project.mock_project_create_response, recipients, 'http://www.foobar.com/projects')
   end
 
   def publish_project_approval_update
@@ -242,10 +243,7 @@ describe JellyfishNotification::SimpleListener do
         expect(ActionMailer::Base.deliveries.count).to eq(0)
       else
         # VERIFY THAT A MAIL WAS SENT UPON PROJECT SAVE AFTER INITIAL CREATE
-        expect(ActionMailer::Base.deliveries.count).to eq(1)
-
-        # VERIFY THAT THE SENDER IS THE RECIPIENT SPECIFIED IN DOTENV FILE
-        expect(ActionMailer::Base.deliveries.last.from.first).to eq(JellyfishNotification::JellyfishMailer.default_params[:from])
+        expect(ActionMailer::Base.deliveries.count).to eq(2)
       end
     end
   end
