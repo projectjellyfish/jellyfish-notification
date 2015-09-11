@@ -4,18 +4,16 @@ module JellyfishNotification
   class JellyfishMailer < ActionMailer::Base
     default from: ENV['JELLYFISH_SMTP_DEFAULT_SENDER']
 
-    def publish_project_create_approvers(response, recipients, projects_url)
-      # format block causes weirdness, so depending on rails conventions so templates resolve
-      @project = JSON.parse(response.body).to_h
-      @project_url = projects_url + "/#{@project['id']}"
+    def publish_project_create_confirmation(project, recipients)
+      @project = project
+      @project_url = (Rails.env != 'test') ? (Rails.application.routes.url_helpers.project_url project) : ('http://localhost:3000/api/v1/projects/' + project.id.to_s)
       recipients = ENV['JELLYFISH_SMTP_DEFAULT_RECIPIENT'] if recipients.empty?
       mail(template_path: 'jellyfish_mailer', to: recipients, subject: "Project Create Notification: #{@project['name'].to_s.upcase}") unless ENV['JELLYFISH_SMTP_DEFAULT_SENDER'].nil?
     end
 
-    def publish_project_create_confirmation(response, recipients, projects_url)
-      # format block causes weirdness, so depending on rails conventions so templates resolve
-      @project = JSON.parse(response.body).to_h
-      @project_url = projects_url + "/#{@project['id']}"
+    def publish_project_create_approvers(project, recipients)
+      @project = project
+      @project_url = (Rails.env != 'test') ? (Rails.application.routes.url_helpers.project_url project) : ('http://localhost:3000/api/v1/projects/' + project.id.to_s)
       recipients = ENV['JELLYFISH_SMTP_DEFAULT_RECIPIENT'] if recipients.empty?
       mail(template_path: 'jellyfish_mailer', to: recipients, subject: "Project Create Notification: #{@project['name'].to_s.upcase}") unless ENV['JELLYFISH_SMTP_DEFAULT_SENDER'].nil?
     end

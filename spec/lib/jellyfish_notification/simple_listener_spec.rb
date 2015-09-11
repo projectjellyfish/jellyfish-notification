@@ -1,3 +1,10 @@
+class Staff
+  def self.admin; end
+  def self.admin_email_pluck
+    ['foo@bar.com']
+  end
+end
+
 class Project
   include Wisper::Publisher
 
@@ -22,30 +29,31 @@ class Project
       end_date: (Time.zone.now + 7.days))
   end
 
-  def self.mock_project_create_response
-    # MOCK JSON RESPONSE FROM THE JF PROJECT CONTROLLER
-    OpenStruct.new(body:  "{
-                   \"id\": 1,
-                   \"name\": \"foo\",
-                   \"description\": null,
-                   \"cc\": null,
-                   \"staff_id\": null,
-                   \"img\": null,
-                   \"created_at\": \"#{Time.zone.now}\",
-                   \"updated_at\": \"#{Time.zone.now}\",
-                   \"deleted_at\": null,
-                   \"status\": 0,
-                   \"approval\": 0,
-                   \"archived\": null,
-                   \"spent\": #{BigDecimal(0.0, 2)},
-                   \"budget\": #{BigDecimal(1.0, 2)},
-                   \"start_date\": \"#{Time.zone.now}\",
-                   \"end_date\": \"#{Time.zone.now + 7.days}\"}")
+  def self.mock_project
+    # MOCK PROJECT AS IT EXISTS IN JF CONTROLLER
+    OpenStruct.new(
+      id: 1,
+      name: 'foo',
+      description: nil,
+      cc: nil,
+      staff_id: nil,
+      img: nil,
+      created_at: Time.zone.now,
+      updated_at: Time.zone.now,
+      deleted_at: nil,
+      status: 0,
+      approval: 0,
+      archived: nil,
+      spent: BigDecimal(0.0, 2),
+      budget: BigDecimal(1.0, 2),
+      start_date: Time.zone.now,
+      end_date: (Time.zone.now + 7.days))
   end
 
   def publish_project_create
-    recipients = { project_approvers: 'admin@foobar.com', project_creator: 'user@foobar.com' }
-    publish('publish_project_create', Project.mock_project_create_response, recipients, 'http://www.foobar.com/projects')
+    project = Project.mock_project
+    current_user = OpenStruct.new(email: 'admin@foobar.com')
+    publish('publish_project_create', project, current_user)
   end
 
   def publish_project_approval_update
@@ -216,13 +224,16 @@ describe JellyfishNotification::SimpleListener do
     end
   end
 
-  context 'project created' do
+  context 'project create' do
     it 'should publish project create and send notification' do
-      # CREATE DUMMY LISTENER - FOLLOWING WISPER RSPEC EXAMPLE AT https://github.com/krisleech/wisper/blob/master/spec/lib/integration_spec.rb
+      # CREATE DUMMY LISTENER
       listener = double('listener')
 
-      # SET EXPECTATION THAT LISTENER WILL RECEIVE PROJECT CREATION SUCCESSFUL BROADCAST
+      # SET EXPECTATION THAT LISTENER WILL RECEIVE PROJECT CREATION ON SUCCESSFUL BROADCAST
       expect(listener).to receive(:publish_project_create)
+
+      # MOCK THE ACTIVE RECORD CALL TO GET STAFF ADMINS
+      allow(Staff).to receive_message_chain('admin.pluck').with(:email) { Staff.admin_email_pluck }
 
       # GENERATE NEW PROJECT
       project = Project.new
