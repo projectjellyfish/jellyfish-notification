@@ -8,27 +8,6 @@ end
 class Project
   include Wisper::Publisher
 
-  def self.mock_approval_update_project
-    # MOCK PROJECT AS IT EXISTS IN JF CONTROLLER
-    OpenStruct.new(
-      id: 1,
-      name: 'foo',
-      description: nil,
-      cc: nil,
-      staff_id: nil,
-      img: nil,
-      created_at: Time.zone.now,
-      updated_at: Time.zone.now,
-      deleted_at: nil,
-      status: 0,
-      approval: 0,
-      archived: nil,
-      spent: BigDecimal(0.0, 2),
-      budget: BigDecimal(1.0, 2),
-      start_date: Time.zone.now,
-      end_date: (Time.zone.now + 7.days))
-  end
-
   def self.mock_project
     # MOCK PROJECT AS IT EXISTS IN JF CONTROLLER
     OpenStruct.new(
@@ -51,18 +30,32 @@ class Project
   end
 
   def publish_project_create
-    project = Project.mock_project
-    current_user = OpenStruct.new(email: 'admin@foobar.com')
-    publish('publish_project_create', project, current_user)
+    publish('publish_project_create', Project.mock_project, OpenStruct.new(email: 'admin@foobar.com'))
   end
 
   def publish_project_approval_update
-    publish('publish_project_approval_update', Project.mock_approval_update_project, '', 'http://www.foobar.com/projects/1')
+    publish('publish_project_approval_update', Project.mock_project)
   end
 end
 
 class Order
   include Wisper::Publisher
+
+  def self.mock_product_one
+    OpenStruct.new(
+      id: 1,
+      name: 'AWS Small EC2',
+      description: 't2.small EC2',
+      active: true,
+      img: 'products/aws_ec2.png',
+      created_at: '2015-09-03T19:51:14.145Z',
+      updated_at: '2015-09-03T19:51:14.145Z',
+      deleted_at: nil,
+      setup_price: 0.0,
+      hourly_price: 0.026,
+      monthly_price: 0.0,
+      product_type: OpenStruct.new(name: 'AWS Fog Infrastructure'))
+  end
 
   def self.mock_order_item_one
     OpenStruct.new(
@@ -85,22 +78,25 @@ class Order
       payload_acknowledgement: nil,
       payload_response: nil,
       status_msg: nil,
-      project: Project.mock_approval_update_project,
-      product:
-        OpenStruct.new(
-          id: 1,
-          name: 'AWS Small EC2',
-          description: 't2.small EC2',
-          active: true,
-          img: 'products/aws_ec2.png',
-          created_at: '2015-09-03T19:51:14.145Z',
-          updated_at: '2015-09-03T19:51:14.145Z',
-          deleted_at: nil,
-          setup_price: 0.0,
-          hourly_price: 0.026,
-          monthly_price: 0.0,
-          product_type: OpenStruct.new(name: 'AWS Fog Infrastructure'))
+      project: Project.mock_project,
+      product: Order.mock_product_one
     )
+  end
+
+  def self.mock_product_two
+    OpenStruct.new(
+      id: 8,
+      name: 'Small MySQL',
+      description: 't2.small MySQL',
+      active: true,
+      img: 'products/aws_rds.png',
+      created_at: '2015-09-03T19:51:14.145Z',
+      updated_at: '2015-09-03T19:51:14.145Z',
+      deleted_at: nil,
+      setup_price: 0.0,
+      hourly_price: 0.034,
+      monthly_price: 0.0,
+      product_type: OpenStruct.new(name: 'AWS Fog Infrastructure'))
   end
 
   def self.mock_order_item_two
@@ -124,21 +120,8 @@ class Order
       payload_acknowledgement: nil,
       payload_response: nil,
       status_msg: nil,
-      project: Project.mock_approval_update_project,
-      product:
-        OpenStruct.new(
-          id: 8,
-          name: 'Small MySQL',
-          description: 't2.small MySQL',
-          active: true,
-          img: 'products/aws_rds.png',
-          created_at: '2015-09-03T19:51:14.145Z',
-          updated_at: '2015-09-03T19:51:14.145Z',
-          deleted_at: nil,
-          setup_price: 0.0,
-          hourly_price: 0.034,
-          monthly_price: 0.0,
-          product_type: OpenStruct.new(name: 'AWS Fog Infrastructure')))
+      project: Project.mock_project,
+      product: Order.mock_product_two)
   end
 
   def self.mock_order_create
@@ -157,7 +140,7 @@ class Order
   end
 
   def publish_order_create
-    publish('publish_order_create', Order.mock_order_create, '', 'http://www.foobar.com/order-history')
+    publish('publish_order_create', Order.mock_order_create, OpenStruct.new(email: 'admin@foobar.com'))
   end
 end
 
@@ -202,6 +185,9 @@ describe JellyfishNotification::SimpleListener do
 
       # SET EXPECTATION THAT LISTENER WILL RECEIVE PROJECT APPROVAL UPDATE BROADCAST
       expect(listener).to receive(:publish_project_approval_update)
+
+      # MOCK THE ACTIVE RECORD CALL TO GET STAFF ADMINS
+      allow(Staff).to receive_message_chain('admin.pluck').with(:email) { Staff.admin_email_pluck }
 
       # GENERATE NEW PROJECT
       project = Project.new
